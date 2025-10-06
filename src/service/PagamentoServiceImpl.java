@@ -1,5 +1,6 @@
 package service;
 
+import model.StatusVenda;
 import model.Venda;
 
 public class PagamentoServiceImpl implements PagamentoService {
@@ -11,7 +12,7 @@ public class PagamentoServiceImpl implements PagamentoService {
 
     @Override
     public boolean pagar(Venda venda, double valor) {
-        if (!"Aguardando pagamento".equals(venda.getStatus())) {
+        if (venda.getStatus() != StatusVenda.AGUARDANDO_PAGAMENTO) {
             throw new IllegalStateException("Venda não está aguardando pagamento!");
         }
 
@@ -19,7 +20,7 @@ public class PagamentoServiceImpl implements PagamentoService {
             throw new IllegalArgumentException("Valor insuficiente para pagamento!");
         }
 
-        venda.setStatus("Pago");
+        venda.setStatus(StatusVenda.PAGO);
         notificacaoService.notificar(venda.getCliente(), "Pagamento recebido com sucesso!");
         return true;
     }

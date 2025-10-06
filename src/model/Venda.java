@@ -11,20 +11,20 @@ public class Venda {
     private final int id;
     private final Cliente cliente;
     private final List<ItemVenda> itens;
-    private String status;
+    private StatusVenda status;
 
     public Venda(Cliente cliente) {
         this.id = contadorId++;
         this.cliente = cliente;
         this.itens = new ArrayList<>();
-        this.status = "Aberto";
+        this.status = StatusVenda.ABERTO;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getStatus() {
+    public StatusVenda getStatus() {
         return status;
     }
 
@@ -32,12 +32,12 @@ public class Venda {
         return cliente;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusVenda status) {
         this.status = status;
     }
 
     public void adicionarItem(Produto produto, int quantidade, double valorVenda) {
-        if (!status.equals("Aberto")) {
+        if (status != StatusVenda.ABERTO) {
             throw new IllegalStateException("Venda não está aberta para adicionar itens!");
         }
         itens.add(new ItemVenda(produto, quantidade, valorVenda));
@@ -53,15 +53,15 @@ public class Venda {
         if (itens.isEmpty() || calcularValorTotal() <= 0) {
             throw new IllegalStateException("Venda inválida! Não pode ser finalizada.");
         }
-        this.status = "Aguardando pagamento";
-        notificacaoService.notificar(cliente, "Sua venda foi finalizada. Aguardando pagamento.");
+        this.status = StatusVenda.AGUARDANDO_PAGAMENTO;
+        notificacaoService.notificar(cliente, "Seu pedido foi finalizado. Aguardando pagamento.");
     }
 
     public void entregar(NotificacaoService notificacaoService) {
-        if (!status.equals("Pago")) {
-            throw new IllegalStateException("Venda não pode ser entregue sem pagamento!");
+        if (status != StatusVenda.PAGO)) {
+            throw new IllegalStateException("Pedido não pago, não pode ser realizado a entrega!");
         }
-        this.status = "Finalizado";
+        this.status = StatusVenda.FINALIZADO;
         notificacaoService.notificar(cliente, "Seu pedido foi entregue!");
     }
 
