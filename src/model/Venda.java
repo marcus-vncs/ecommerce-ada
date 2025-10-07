@@ -14,6 +14,7 @@ public class Venda {
     private final List<ItemVenda> itens;
     private StatusVenda status;
     private final LocalDateTime dataCriacao;
+    private CupomDeDesconto cupom;
 
     public Venda(Cliente cliente) {
         this.id = contadorId++;
@@ -46,10 +47,23 @@ public class Venda {
         itens.add(new ItemVenda(produto, quantidade, valorVenda));
     }
 
+    public void aplicarCupom(CupomDeDesconto cupom) {
+        if (!cupom.isValido()) {
+            throw new IllegalArgumentException("Cupom inválido ou expirado!");
+        }
+        this.cupom = cupom;
+        cupom.marcarComoUtilizado();
+        System.out.println("Cupom aplicado com sucesso: " + cupom.getCodigo());
+    }
+
     public double calcularValorTotal() {
-        return itens.stream()
+        double total = itens.stream()
                 .mapToDouble(ItemVenda::calcularSubtotal)
                 .sum();
+        if (cupom != null && cupom.isValido()) {
+            total -= total * (cupom.getPercentualDesconto() / 100);
+        }
+        return total;
     }
 
     public void finalizar(NotificacaoService notificacaoService) {
